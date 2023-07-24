@@ -1,0 +1,56 @@
+class SNPData:
+    def __init__(self, chr, snp, a1, a2, maf, nchrobs):
+        self.chr = chr
+        self.snp = snp
+        self.a1 = a1
+        self.a2 = a2
+        self.maf = maf
+        self.nchrobs = nchrobs
+
+def parse_snp_data_from_file(file_path):
+    snp_data_list = []
+    with open(file_path, 'r') as file:
+        next(file)  # Skip the header line
+        for line in file:
+            chr, snp, a1, a2, maf, nchrobs = line.strip().split('\t')
+            snp_data = SNPData(int(chr), snp, a1, a2, float(maf), int(nchrobs))
+            snp_data_list.append(snp_data)
+    return snp_data_list
+
+def create_maf_classes(snp_data_list):
+    maf_classes = {
+        '0.05 to 0.1': [],
+        '0.1 to 0.2': [],
+        '0.2 to 0.3': [],
+        '0.3 to 0.4': [],
+        '0.4 to 0.5': []
+    }
+
+    for snp_data in snp_data_list:
+        maf = snp_data.maf
+        if 0.05 <= maf < 0.1:
+            maf_classes['0.05 to 0.1'].append(snp_data)
+        elif 0.1 <= maf < 0.2:
+            maf_classes['0.1 to 0.2'].append(snp_data)
+        elif 0.2 <= maf < 0.3:
+            maf_classes['0.2 to 0.3'].append(snp_data)
+        elif 0.3 <= maf < 0.4:
+            maf_classes['0.3 to 0.4'].append(snp_data)
+        elif 0.4 <= maf <= 0.5:
+            maf_classes['0.4 to 0.5'].append(snp_data)
+
+    return maf_classes
+
+def print_snps_in_maf_classes(maf_classes):
+    for maf_range, snps in maf_classes.items():
+        print(f"MAF {maf_range}: {len(snps)} SNPs")
+        for snp in snps:
+            print(f"CHR: {snp.chr}, SNP: {snp.snp}, A1: {snp.a1}, A2: {snp.a2}, MAF: {snp.maf}, NCHROBS: {snp.nchrobs}")
+
+if __name__ == "__main__":
+    file_path = "/media/yami/Elements/DDRAD_SAHIWAL/maf.txt"  # Replace with the actual path to your .txt file
+    snp_data_list = parse_snp_data_from_file(file_path)
+    maf_classes = create_maf_classes(snp_data_list)
+
+    # Print the counts of SNPs in each MAF class and the detailed list of SNPs
+    print_snps_in_maf_classes(maf_classes)
