@@ -1,0 +1,65 @@
+import matplotlib.pyplot as plt
+
+class SNPData:
+    def __init__(self, chr, snp, a1, a2, maf, nchrobs):
+        self.chr = chr
+        self.snp = snp
+        self.a1 = a1
+        self.a2 = a2
+        self.maf = maf
+        self.nchrobs = nchrobs
+
+def parse_snp_data_from_file(file_path):
+    snp_data_list = []
+    with open(file_path, 'r') as file:
+        next(file)  # Skip the header line
+        for line in file:
+            chr, snp, a1, a2, maf, nchrobs = line.strip().split('\t')
+            snp_data = SNPData(int(chr), snp, a1, a2, float(maf), int(nchrobs))
+            snp_data_list.append(snp_data)
+    return snp_data_list
+
+def create_maf_classes(snp_data_list):
+    maf_classes = {
+        '0.05 to 0.1': [],
+        '0.1 to 0.2': [],
+        '0.2 to 0.3': [],
+        '0.3 to 0.4': [],
+        '0.4 to 0.5': []
+    }
+
+    for snp_data in snp_data_list:
+        maf = snp_data.maf
+        if 0.05 <= maf < 0.1:
+            maf_classes['0.05 to 0.1'].append(snp_data)
+        elif 0.1 <= maf < 0.2:
+            maf_classes['0.1 to 0.2'].append(snp_data)
+        elif 0.2 <= maf < 0.3:
+            maf_classes['0.2 to 0.3'].append(snp_data)
+        elif 0.3 <= maf < 0.4:
+            maf_classes['0.3 to 0.4'].append(snp_data)
+        elif 0.4 <= maf <= 0.5:
+            maf_classes['0.4 to 0.5'].append(snp_data)
+
+    return maf_classes
+
+def plot_snps_in_maf_classes(maf_classes):
+    maf_ranges = list(maf_classes.keys())
+    snp_counts = [len(snps) for snps in maf_classes.values()]
+
+    plt.bar(maf_ranges, snp_counts)
+    plt.xlabel('MAF Range')
+    plt.ylabel('Number of SNPs')
+    plt.title('Number of SNPs in each MAF Class')
+    plt.xticks(rotation=45, ha='right')
+
+    plt.show()
+
+if __name__ == "__main__":
+    input_file_path = "/media/yami/Elements/DDRAD_SAHIWAL/maf.txt"    # Replace with the actual path to your input .txt file
+
+    snp_data_list = parse_snp_data_from_file(input_file_path)
+    maf_classes = create_maf_classes(snp_data_list)
+
+    # Plot the counts of SNPs in each MAF class as a bar chart
+    plot_snps_in_maf_classes(maf_classes)
